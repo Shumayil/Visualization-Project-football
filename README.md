@@ -22,7 +22,8 @@ A suite of 13 interactive football visualizations built with Python and Plotly. 
 
 - Python 3.8+
 - pip
-- SQLite (for inspecting the database, optional)
+- unzip (for decompressing the database)
+- SQLite (optional, for manual inspection)
 
 ## Installation
 
@@ -33,7 +34,13 @@ A suite of 13 interactive football visualizations built with Python and Plotly. 
    cd <repository-folder>
    ```
 
-2. (Optional) Create and activate a virtual environment:
+2. Unzip the database archive into the project root:
+
+   ```bash
+   unzip database.sqlite.zip -d .
+   ```
+
+3. (Optional) Create and activate a virtual environment:
 
    ```bash
    python -m venv venv
@@ -41,7 +48,7 @@ A suite of 13 interactive football visualizations built with Python and Plotly. 
    venv\Scripts\activate    # Windows
    ```
 
-3. Install required Python packages:
+4. Install required Python packages:
 
    ```bash
    pip install pandas numpy plotly
@@ -49,7 +56,7 @@ A suite of 13 interactive football visualizations built with Python and Plotly. 
 
 ## Usage
 
-1. Ensure `database.sqlite` is in the project root (or update `DB_PATH` in `project.py`).
+1. Confirm `database.sqlite` is present in the project root (after unzipping).
 2. Run the main script to generate visualizations:
 
    ```bash
@@ -67,8 +74,10 @@ A suite of 13 interactive football visualizations built with Python and Plotly. 
 ## Video Demonstration
 
 A 3–5 minute walk-through of the visualizations is available here:
-\[https://www.youtube.com/watch?v=-jmFyWXQdVw&ab_channel=MuhammadShumayil]
+\[YouTube Demo Video Link Here]
 
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Repository Structure
