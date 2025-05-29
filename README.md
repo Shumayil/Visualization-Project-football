@@ -73,11 +73,9 @@ A suite of 13 interactive football visualizations built with Python and Plotly. 
 
 ## Video Demonstration
 
-A 3–5 minute walk-through of the visualizations is available here:
-\[YouTube Demo Video Link Here]
+A walk-through of the visualizations is available here:
+\[https://www.youtube.com/watch?v=-jmFyWXQdVw&ab_channel=MuhammadShumayil]
 
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Repository Structure
