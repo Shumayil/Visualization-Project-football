@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Football Data Visualizations</title>
+    
+    <!-- Pike Street Theme for Reveal.js - Professional Microsoft Style -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+    
+    <!-- Custom Pike Street inspired theme -->
+    <style>
+        :root {
+            --main-color: #0078d4;
+            --secondary-color: #2b579a;
+            --accent-color: #ffb900;
+            --text-color: #252525;
+            --background-color: #f3f3f3;
+            --code-bg-color: #f8f8f8;
+            --link-color: #0078d4;
+            --header-font: 'Segoe UI Light', 'Open Sans Light', sans-serif;
+            --body-font: 'Segoe UI', 'Open Sans', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: var(--body-font);
+        }
+        
+        .reveal {
+            font-family: var(--body-font);
+            font-size: 36px;
+            font-weight: normal;
+            color: var(--text-color);
+        }
+        
+        .reveal .slides {
+            text-align: left;
+        }
+        
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
+            margin: 0 0 20px 0;
+            color: var(--main-color);
+            font-family: var(--header-font);
+            font-weight: 300;
+            line-height: 1.2;
+            letter-spacing: normal;
+            text-transform: none;
+            text-shadow: none;
+            word-wrap: break-word;
+        }
+        
+        .reveal h1 {
+            font-size: 2.5em;
+        }
+        
+        .reveal h2 {
+            font-size: 1.8em;
+        }
+        
+        .reveal h3 {
+            font-size: 1.4em;
+            color: var(--secondary-color);
+        }
+        
+        .reveal p {
+            margin: 20px 0;
+            line-height: 1.3;
+        }
+        
+        .reveal a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        
+        .reveal a:hover {
+            color: var(--accent-color);
+            text-shadow: none;
+            border: none;
+        }
+        
+        .reveal .progress {
+            height: 5px;
+            color: var(--main-color);
+        }
+        
+        .reveal .controls {
+            color: var(--main-color);
+        }
+        
+        /* Custom slide layouts */
+        .title-slide {
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 3em;
+            margin-bottom: 0.2em;
+        }
+        
+        .title-slide h3 {
+            font-size: 1.2em;
+            margin-bottom: 2em;
+            color: var(--secondary-color);
+        }
+        
+        .title-slide p {
+            font-size: 0.8em;
+        }
+        
+        .two-col {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 0 10px;
+        }
+        
+        /* Visualization container */
+        .visualization-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .visualization-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Fullscreen button */
+        .fullscreen-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--body-font);
+            font-size: 0.6em;
+            transition: background-color 0.2s;
+        }
+        
+        .fullscreen-button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* Fullscreen visualization */
+        .fullscreen-viz {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: white;
+            display: none;
+        }
+        
+        .fullscreen-viz.active {
+            display: block;
+        }
+        
+        .fullscreen-viz iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .exit-fullscreen {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        /* Microsoft-style accent bar */
+        .ms-accent-bar {
+            height: 8px;
+            width: 100%;
+            background-color: var(--main-color);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        /* Microsoft-style footer */
+        .ms-footer {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.4em;
+            color: #666;
+        }
+        
+        /* Speaker notes styling */
+        .speaker-notes {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 10px;
+            font-size: 0.5em;
+            border-top: 2px solid var(--main-color);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .speaker-notes.visible {
+            display: block;
+        }
+        
+        /* Toggle notes button */
+        .toggle-notes {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.4em;
+            cursor: pointer;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title Slide -->
+            <section class="title-slide">
+                <div class="ms-accent-bar"></div>
+                <h1>Interactive Football Data Visualizations</h1>
+                <h3>Identifying Talent, Understanding Performance, and Challenging Tactical Assumptions</h3>
+                <p>By Shumayil and Shireen</p>
+                <div class="speaker-notes">
+                    Good day everyone. I'm Shumayil, and together with my colleague Shireen, we'll be presenting our interactive football data visualizations project. We've analyzed European football data from 2008 to 2016 to help coaches make informed player recruitment decisions and convince club presidents to fund those bookings.
+                </div>
+            </section>
+
+            <!-- Introduction Slide -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Research Questions</h2>
+                <ul>
+                    <li class="fragment">How can we identify promising young players with high potential?</li>
+                    <li class="fragment">What factors contribute to team performance improvement over time?</li>
+                    <li class="fragment">How does tactical approach impact match outcomes?</li>
+                </ul>
+                <div class="speaker-notes">
+                    Our project addresses three key research questions:
+                    1. How can we identify promising young players with high potential?
+                    2. What factors contribute to team performance improvement over time?
+                    3. How does tactical approach impact match outcomes?
+                    
+                    We've created 13 interactive visualizations that provide insights into these questions. Let me walk you through some of our key findings.
+                </div>
+            </section>
+
+            <!-- Story 1 Introduction -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Story 1: Identifying Promising Young Talent</h2>
+                <p>Using data to find undervalued players with high potential</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/player_potential_matrix.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    The first challenge for any coach is identifying promising talent that offers good value. Let's look at our Player Potential Matrix visualization.
+                    
+                    This scatter plot positions players based on their current rating versus potential rating. The color represents age, with younger players in brighter colors, and the size indicates market value. The most interesting players are in the top-left quadrant - young players with high potential relative to their current rating.
+                </div>
+            </section>
+
+            <!-- Visualization 1 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Player Potential Matrix</h2>
+                <p>Identifying undervalued players with high growth potential</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/player_potential_matrix.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    We can filter by position, age range, and league to focus our search. For example, when we filter for midfielders under 23, we can identify several promising talents that might be undervalued in the market.
+                </div>
+            </section>
+
+            <!-- Visualization 2 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Player Attributes Radar</h2>
+                <p>Comparing player skills across key attributes</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/player_attributes_radar.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    To evaluate specific player skills, we use our Player Attributes Radar.
+                    
+                    Here we can compare multiple players across key attributes. Notice how Player A excels in technical skills while Player B has superior physical attributes. This helps us identify players that match our team's specific needs.
+                </div>
+            </section>
+
+            <!-- Visualization 11 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Player Consistency Matrix</h2>
+                <p>Finding players who are not just good, but consistently good</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/player_consistency_matrix.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    Our Player Consistency Matrix adds another dimension to recruitment.
+                    
+                    This visualization plots average performance against consistency. The ideal players are in the top-right quadrant - consistently high performers. Players in the top-left might be talented but unreliable, making them riskier signings.
+                </div>
+            </section>
+
+            <!-- Story 2 Introduction -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Story 2: Understanding Team Performance Trends</h2>
+                <p>Analyzing patterns of team improvement and tactical strengths</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/team_performance_trajectory.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    Thank you, Shumayil. Now I'll discuss how we can understand team performance trends over time.
+                    
+                    Our Team Performance Analyzer tracks points across multiple seasons.
+                </div>
+            </section>
+
+            <!-- Visualization 3 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Team Performance Trajectory</h2>
+                <p>Tracking team improvement over multiple seasons</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/team_performance_trajectory.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    This visualization reveals which teams have shown consistent improvement. Notice how Team X has steadily increased their points total over the past five seasons, while Team Y has declined despite higher initial performance.
+                </div>
+            </section>
+
+            <!-- Visualization 7 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Team Tactical Matchup Matrix</h2>
+                <p>Understanding performance against different tactical approaches</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/team_tactical_matchup_matrix.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    The Tactical Matchup Matrix provides deeper insights into team strengths.
+                    
+                    This heatmap shows how teams perform against different tactical approaches. Darker green indicates better performance. Team Z performs well against possession-based teams but struggles against counter-attacking sides, suggesting specific tactical vulnerabilities.
+                </div>
+            </section>
+
+            <!-- Visualization 13 (Placeholder since it had an error) -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>"Giant Killer" Identifier</h2>
+                <p>Comparing performance against top teams versus bottom teams</p>
+                <div class="visualization-container" style="display: flex; justify-content: center; align-items: center; background-color: #f5f5f5;">
+                    <div class="visualization-container">
+                        <iframe src="final_visualizations_completed/giant_killer_identifier.html" allowfullscreen></iframe>
+                        </div>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    Our "Giant Killer" Identifier reveals another interesting pattern.
+                    
+                    This chart compares team performance against top teams versus bottom teams. Teams above the diagonal line perform better against stronger opposition - true "giant killers" - while those below might be "flat-track bullies" who rack up points against weaker teams but struggle in big matches.
+                </div>
+            </section>
+
+            <!-- Story 3 Introduction -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Story 3: Tactical Insights Beyond Conventional Wisdom</h2>
+                <p>Challenging assumptions with data-driven analysis</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/possession_outcome_explorer.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    Finally, let's challenge some conventional wisdom about football tactics.
+                    
+                    Our Possession Outcome Explorer questions the relationship between possession and winning.
+                </div>
+            </section>
+
+            <!-- Visualization 4 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Possession Outcome Explorer</h2>
+                <p>Questioning the relationship between possession and winning</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/possession_outcome_explorer.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    Conventional wisdom suggests more possession leads to more wins, but our data shows a more nuanced picture. Notice the cluster of winning performances with less than 50% possession in the bottom-right quadrant - successful counter-attacking strategies.
+                </div>
+            </section>
+
+            <!-- Visualization 12 (Using simplified network) -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Team Chemistry & Passing Network</h2>
+                <p>Visualizing how team structures evolve over time (simplified for clarity)</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/passing_network_comparison.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    The Team Chemistry visualization reveals how team structures evolve.
+                    
+                    These network graphs show player connections for the same team across two seasons. Notice how the network density and central nodes have changed, reflecting tactical evolution and player importance.
+                </div>
+            </section>
+
+            <!-- Visualization 10 -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Shot Map & xG Analyzer</h2>
+                <p>Focusing on shot quality over quantity</p>
+                <div class="visualization-container">
+                    <iframe src="final_visualizations_completed/shot_map_conceptual.html" allowfullscreen></iframe>
+                </div>
+                <button class="fullscreen-button">View Fullscreen</button>
+                <div class="speaker-notes">
+                    Our Shot Map Analyzer provides insights into shooting efficiency.
+                    
+                    This visualization shows shot locations colored by outcome, with size representing expected goal value. Teams often focus on shot quantity, but our analysis shows location and quality matter more. Notice how Team A scores more goals despite fewer shots due to higher-quality chances.
+                </div>
+            </section>
+
+            <!-- Conclusion Slide -->
+            <section>
+                <div class="ms-accent-bar"></div>
+                <h2>Conclusion</h2>
+                <ul>
+                    <li class="fragment">Player recruitment should consider potential, specific attributes, and consistency</li>
+                    <li class="fragment">Team improvement patterns reveal both tactical strengths and vulnerabilities</li>
+                    <li class="fragment">Conventional wisdom about possession and attacking needs to be challenged with data</li>
+                </ul>
+                <h3 class="fragment">Thank you!</h3>
+                <div class="speaker-notes">
+                    To summarize our findings:
+                    
+                    1. Player recruitment should consider potential, specific attributes, and consistency - not just current performance
+                    2. Team improvement patterns reveal both tactical strengths and vulnerabilities
+                    3. Conventional wisdom about possession and attacking needs to be challenged with data-driven insights
+                    
+                    Our interactive visualizations provide coaches with powerful tools to make informed decisions and convince club presidents with compelling data-driven arguments.
+                    
+                    Thank you for your attention. We're happy to answer any questions about our approach or findings.
+                </div>
+                <div class="ms-footer">Football Data Visualization Project | Shumayil & Shireen | 2025</div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Fullscreen visualization container -->
+    <div class="fullscreen-viz">
+        <iframe id="fullscreen-iframe" src="" allowfullscreen></iframe>
+        <button class="exit-fullscreen">×</button>
+    </div>
+
+    <!-- Toggle notes button -->
+    <button class="toggle-notes">Show Notes</button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+    <script>
+        // Initialize Reveal.js
+        let deck = Reveal.initialize({
+            controls: true,
+            progress: true,
+            center: false,
+            hash: true,
+            transition: 'slide',
+            width: '100%',
+            height: '100%',
+            margin: 0.05,
+            minScale: 0.2,
+            maxScale: 2.0,
+            autoSlide: 0,
+            mouseWheel: false,
+            fragments: true
+        });
+        
+        // Fullscreen visualization functionality
+        const fullscreenButtons = document.querySelectorAll('.fullscreen-button');
+        const fullscreenContainer = document.querySelector('.fullscreen-viz');
+        const fullscreenIframe = document.getElementById('fullscreen-iframe');
+        const exitFullscreenBtn = document.querySelector('.exit-fullscreen');
+        
+        fullscreenButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const container = event.target.closest('section').querySelector('.visualization-container');
+                const iframe = container.querySelector('iframe');
+                
+                if (iframe) {
+                    fullscreenIframe.src = iframe.src;
+                    fullscreenContainer.classList.add('active');
+                }
+            });
+        });
+        
+        exitFullscreenBtn.addEventListener('click', () => {
+            fullscreenContainer.classList.remove('active');
+        });
+        
+        // Toggle speaker notes
+        const toggleNotesBtn = document.querySelector('.toggle-notes');
+        let notesVisible = false;
+        
+        toggleNotesBtn.addEventListener('click', () => {
+            notesVisible = !notesVisible;
+            const notes = document.querySelectorAll('.speaker-notes');
+            
+            if (notesVisible) {
+                const currentSlide = Reveal.getCurrentSlide();
+                const currentNote = currentSlide.querySelector('.speaker-notes');
+                
+                if (currentNote) {
+                    currentNote.classList.add('visible');
+                }
+                
+                toggleNotesBtn.textContent = 'Hide Notes';
+            } else {
+                notes.forEach(note => note.classList.remove('visible'));
+                toggleNotesBtn.textContent = 'Show Notes';
+            }
+        });
+        
+        // Update notes visibility when slide changes
+        Reveal.on('slidechanged', (event) => {
+            if (notesVisible) {
+                const notes = document.querySelectorAll('.speaker-notes');
+                notes.forEach(note => note.classList.remove('visible'));
+                
+                const currentNote = event.currentSlide.querySelector('.speaker-notes');
+                if (currentNote) {
+                    currentNote.classList.add('visible');
+                }
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'n') {
+                toggleNotesBtn.click();
+            } else if (e.key === 'f') {
+                const currentSlide = Reveal.getCurrentSlide();
+                const fullscreenBtn = currentSlide.querySelector('.fullscreen-button');
+                
+                if (fullscreenBtn) {
+                    fullscreenBtn.click();
+                }
+            } else if (e.key === 'Escape' && fullscreenContainer.classList.contains('active')) {
+                exitFullscreenBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
